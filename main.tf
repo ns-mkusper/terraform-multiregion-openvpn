@@ -6,7 +6,7 @@ module "eu-west" {
   source        = "modules/openvpn"
   aws_profile   = "${var.aws_profile}"
   aws_region    = "eu-west-2"
-  instance_type = "t2.micro"
+  instance_type = "t3.nano"
   ami           = "${var.ami}"
   pub_key       = "${var.pub_key}"
 }
@@ -21,7 +21,7 @@ module "us-west" {
   }
 
   source        = "modules/openvpn"
-  instance_type = "t2.micro"
+  instance_type = "t3.nano"
   aws_profile   = "${var.aws_profile}"
   aws_region    = "us-west-2"
   ami           = "${var.ami}"

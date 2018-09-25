@@ -1,4 +1,4 @@
 ---
-  - src: https://github.com/Stouts/Stouts.openvpn
-    version: 1d08b23
-    name: Stouts.openvpn
+  - src: https://github.com/kyl191/ansible-role-openvpn
+    version: 112f9f5
+    name: kykl191.openvpn
