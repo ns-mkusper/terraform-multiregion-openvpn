@@ -1,8 +1,4 @@
-VPN_NAME 						:= default
-VPN_USER 						:= ehime
-VPN_PASSWORD 				:= changeme
 TF_VAR_pub_key 			:= $(shell cat ./ec2-key.pub)
-TF_VAR_aws_profile	:= GEHC-030
 ANSIBLE_ROLES_PATH 	:= ./ansible/roles
 ANSIBLE_CONFIG 			:= ./ansible/ansible.cfg
 
@@ -25,17 +21,20 @@ vpn:
 	TF_VAR_aws_profile=$$profile make apply && 		\
 	TF_VAR_aws_profile=$$profile make reprovision
 
+
+require-vault:
+	aws-vault --version &> /dev/null
+
 require-ansible:
 	ansible --version &> /dev/null
 
-require-tf:
-	terraform --version &> /dev/null
+require-tf: require-vault
+	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "--version" &> /dev/null
+	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "init"
 
 require-jq:
 	jq --version &> /dev/null
 
-require-vault:
-	aws-vault --version &> /dev/null
 
 
 keypair:
@@ -44,38 +43,37 @@ keypair:
 ansible-roles:
 	ansible-galaxy install -r ./ansible/requirements.yml
 
+
 plan: assert-TF_VAR_aws_profile require-tf
-	terraform plan
-
-
+	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "plan"
 
 apply: assert-TF_VAR_aws_profile require-tf require-ansible ansible-roles
 	@ if [ -z "$TF_VAR_pub_key" ] ; then 														\
 		echo "\$TF_VAR_pub_key is empty; run 'make keypair' first!"	; \
 		exit 1 ; 																											\
 	fi
-	terraform apply
+	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "apply"
 
 build: apply
 
-ssh:
+
+ssh: require-tf
 	ssh 											\
 	 -i ./ec2-key 						\
 	 -l ubuntu 								\
-	 `terraform output -json |jq -r ".ip.value"`
+	 `aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "output" "-json" |jq -r ".ip.value"`
 
-plan-destroy:
-	terraform plan -destroy
 
-destroy:
-	terraform destroy
+plan-destroy: assert-TF_VAR_aws_profile require-tf
+	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "plan" "-destroy"
+
+destroy: assert-TF_VAR_aws_profile require-tf
+	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "destroy"
 
 clean: destroy
+	rm -rf *.ovpn ec2-key* .terraform terraform.*
 
-reprovision: require-jq
-	ansible-playbook 																	\
-	 -e vpn_name=${VPN_NAME} 													\
-	 -e vpn_user=${VPN_USER} 													\
-	 -e vpn_password=${VPN_PASSWORD} 									\
-	 -i `terraform output -json |jq -r ".ip.value"`, 	\
+reprovision: assert-TF_VAR_aws_profile require-tf require-jq 
+	ansible-playbook 																																																				\
+	 -i `aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "output" "-json" |jq -r ".ip.value"`, \
 	 ./openvpn.yml
