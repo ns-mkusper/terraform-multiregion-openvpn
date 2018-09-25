@@ -18,8 +18,10 @@ You'll also need local copies of `terraform`, `ansible`, and `jq`.  My (confirme
 
     $ terraform --version
     Terraform v0.11.8
+
     $ ansible --version
     ansible 2.6.3
+
     $ jq --version
     jq-1.5
 
