@@ -2,15 +2,13 @@ VPN_NAME 						:= default
 VPN_USER 						:= ehime
 VPN_PASSWORD 				:= changeme
 TF_VAR_pub_key 			:= $(shell cat ./ec2-key.pub)
-TF_VAR_aws_az 			:= us-east-1d
-TF_VAR_ami 					:= ami-845367ff
-ANSIBLE_ROLES_PATH 	:= ./roles
-ANSIBLE_CONFIG 			:= ./ansible.cfg
+TF_VAR_aws_profile	:= GEHC-030
+ANSIBLE_ROLES_PATH 	:= ./ansible/roles
+ANSIBLE_CONFIG 			:= ./ansible/ansible.cfg
 
 export VPN_NAME VPN_USER VPN_PASSWORD
 export ANSIBLE_CONFIG ANSIBLE_ROLES_PATH
-export TF_VAR_ami TF_VAR_aws_az
-export TF_VAR_pub_key
+export TF_VAR_profile TF_VAR_pub_key
 
 
 # An implicit guard target, used by other targets to ensure
@@ -36,14 +34,20 @@ require-tf:
 require-jq:
 	jq --version &> /dev/null
 
+require-vault:
+	aws-vault --version &> /dev/null
+
+
 keypair:
 	ssh-keygen -N '' -f ec2-key
+
+ansible-roles:
+	ansible-galaxy install -r ./ansible/requirements.yml
 
 plan: assert-TF_VAR_aws_profile require-tf
 	terraform plan
 
-ansible-roles:
-	ansible-galaxy install -r requirements.yml
+
 
 apply: assert-TF_VAR_aws_profile require-tf require-ansible ansible-roles
 	@ if [ -z "$TF_VAR_pub_key" ] ; then 														\

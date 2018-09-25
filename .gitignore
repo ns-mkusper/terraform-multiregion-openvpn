@@ -107,7 +107,7 @@ terraform.tfstate*
 *.key
 *.ovpn
 *.retry
-roles/
+ansible/roles/
 *.lock.info
 *.tfvars
 
