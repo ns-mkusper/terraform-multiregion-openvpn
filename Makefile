@@ -4,7 +4,7 @@ ANSIBLE_CONFIG 			:= ./ansible/ansible.cfg
 
 export VPN_NAME VPN_USER VPN_PASSWORD
 export ANSIBLE_CONFIG ANSIBLE_ROLES_PATH
-export TF_VAR_pub_key
+export TF_VAR_aws_profile TF_VAR_pub_key
 
 
 # An implicit guard target, used by other targets to ensure
@@ -61,8 +61,7 @@ ssh: require-tf
 	ssh 																																\
 	 -i ./ec2-key 																											\
 	 -l ubuntu 																													\
-	 `aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m 				\
-	 	-- "/usr/local/bin/terraform" "output" "-json" |jq -r ".ip.value"`
+	 `terraform output -json |jq -r ".ip.value"`
 
 
 plan-destroy: require-tf
@@ -76,5 +75,5 @@ clean: destroy
 
 reprovision: require-tf require-jq
 	ansible-playbook 																																																										\
-	 -i `aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "output" "-json" |jq -r ".[].value"`, \
+	 -i `terraform output -json |jq -r '.[].value | join(",")'`, \
 	 ./ansible/openvpn.yml
