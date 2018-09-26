@@ -29,8 +29,8 @@ require-ansible:
 	ansible --version &> /dev/null
 
 require-tf: require-vault
-	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "--version" &> /dev/null
-	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "init"
+	aws-vault exec ${profile} --assume-role-ttl=60m -- "/usr/local/bin/terraform" "--version" &> /dev/null
+	aws-vault exec ${profile} --assume-role-ttl=60m -- "/usr/local/bin/terraform" "init"
 
 require-jq:
 	jq --version &> /dev/null
@@ -45,7 +45,7 @@ ansible-roles:
 
 
 plan: assert-TF_VAR_aws_profile require-tf
-	aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "plan"
+	aws-vault exec ${profile} --assume-role-ttl=60m -- "/usr/local/bin/terraform" "plan"
 
 apply: assert-TF_VAR_aws_profile require-tf require-ansible ansible-roles
 	@ if [ -z "$TF_VAR_pub_key" ] ; then 														\
@@ -73,7 +73,7 @@ destroy: assert-TF_VAR_aws_profile require-tf
 clean: destroy
 	rm -rf *.ovpn ec2-key* .terraform terraform.*
 
-reprovision: assert-TF_VAR_aws_profile require-tf require-jq 
+reprovision: assert-TF_VAR_aws_profile require-tf require-jq
 	ansible-playbook 																																																				\
 	 -i `aws-vault exec $$profile --assume-role-ttl=60m -- "/usr/local/bin/terraform" "output" "-json" |jq -r ".ip.value"`, \
 	 ./openvpn.yml

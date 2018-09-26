@@ -29,7 +29,7 @@ resource "aws_instance" "openvpn" {
     Name = "openvpn${var.deployment_suffix}"
   }
 
-  user_data       = "${base64encode(file("_files/user_data.sh"))}"
+  user_data       = "${file("${path.module}/_files/user_data.sh")}"
   security_groups = ["${aws_security_group.openvpn.name}"]
 }
 
