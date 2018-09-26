@@ -75,5 +75,5 @@ clean: destroy
 
 reprovision: require-tf require-jq
 	ansible-playbook 																																																										\
-	 -i `terraform output -json |jq -r '.[].value | join(",")'`, \
+	 -i `terraform output -json |jq -r '. |map(.value) |join (",")'`, \
 	 ./ansible/openvpn.yml
