@@ -10,15 +10,15 @@ export TF_VAR_aws_profile TF_VAR_pub_key
 # An implicit guard target, used by other targets to ensure
 # that environment variables are set before beginning tasks
 assert-%:
-	@ if [ "${${*}}" = "" ] ; then 								\
-	    echo "Environment variable $* not set" ; 	\
-	    exit 1 ; 																	\
+	@ if [ "${${*}}" = "" ] ; then 																		\
+	    echo "Environment variable $* not set" ; 											\
+	    exit 1 ; 																											\
 	fi
 
 vpn:
-	@read -p "Enter AWS Profile Name: " profile ; 	\
-	TF_VAR_aws_profile=$$profile make keypair && 		\
-	TF_VAR_aws_profile=$$profile make apply 	&& 		\
+	@read -p "Enter AWS Profile Name: " profile ; 										\
+	TF_VAR_aws_profile=$$profile make keypair && 											\
+	TF_VAR_aws_profile=$$profile make apply 	&& 											\
 	TF_VAR_aws_profile=$$profile make reprovision
 
 
@@ -48,9 +48,9 @@ plan: require-tf
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "plan"
 
 apply: require-tf require-ansible ansible-roles
-	@ if [ -z "$TF_VAR_pub_key" ] ; then 														\
-		echo "\$TF_VAR_pub_key is empty; run 'make keypair' first!"	; \
-		exit 1 ; 																											\
+	@ if [ -z "$TF_VAR_pub_key" ] ; then 																\
+		echo "\$TF_VAR_pub_key is empty; run 'make keypair' first!"	; 		\
+		exit 1 ; 																													\
 	fi
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "apply"
 
@@ -74,6 +74,7 @@ clean: destroy
 	rm -rf *.ovpn ec2-key* .terraform terraform.*
 
 reprovision: require-tf require-jq
-	ansible-playbook 																																																										\
+	ansible-playbook 																									\
+	 -vvvv 																														\
 	 -i `terraform output -json |jq -r '. |map(.value) |join (",")'`, \
 	 ./ansible/openvpn.yml
