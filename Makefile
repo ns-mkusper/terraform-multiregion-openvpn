@@ -28,7 +28,7 @@ require-vault:
 require-ansible:
 	ansible --version &> /dev/null
 
-require-tf: require-vault
+require-tf: assert-TF_VAR_aws_profile require-vault
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "--version" &> /dev/null
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "init"
 
@@ -52,16 +52,17 @@ apply: require-tf require-ansible ansible-roles
 		echo "\$TF_VAR_pub_key is empty; run 'make keypair' first!"	; 		\
 		exit 1 ; 																													\
 	fi
-	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "apply"
+	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "apply" "-auto-approve"
 
 build: apply
 
-
-ssh: require-tf
-	ssh 																																\
-	 -i ./ec2-key 																											\
-	 -l ubuntu 																													\
-	 `terraform output -json |jq -r ".ip.value"`
+# Broken for now, needs IP selector over EIP or PUBIP
+#
+# ssh: require-tf
+# 	ssh 																																\
+# 	 -i ./ec2-key 																											\
+# 	 -l ubuntu 																													\
+# 	 `terraform output -json |jq -r ".ip.value"`
 
 
 plan-destroy: require-tf
@@ -75,6 +76,6 @@ clean: destroy
 
 reprovision: require-tf require-jq
 	ansible-playbook 																									\
-	 -vvvv 																														\
+	 -v		 																														\
 	 -i `terraform output -json |jq -r '. |map(.value) |join (",")'`, \
 	 ./ansible/openvpn.yml
