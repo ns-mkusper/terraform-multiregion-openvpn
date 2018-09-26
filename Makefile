@@ -75,6 +75,6 @@ clean: destroy
 	rm -rf *.ovpn ec2-key* .terraform terraform.*
 
 reprovision: require-tf require-jq
-	ansible-playbook 																																																				\
-	 -i `aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "output" "-json" |jq -r ".ip.value"`, \
+	ansible-playbook 																																																										\
+	 -i `aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "output" "-json" |jq -r ".[].value"`, \
 	 ./ansible/openvpn.yml
