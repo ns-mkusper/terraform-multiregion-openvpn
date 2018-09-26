@@ -11,10 +11,6 @@ module "eu-west" {
   pub_key       = "${var.pub_key}"
 }
 
-output "eu-west-ip" {
-  value = "${module.eu-west.ip}"
-}
-
 module "us-west" {
   providers = {
     "aws" = "aws.us-west"
@@ -28,6 +24,28 @@ module "us-west" {
   pub_key       = "${var.pub_key}"
 }
 
-output "us-west-ip" {
-  value = "${module.us-west.ip}"
+module "us-east" {
+  providers = {
+    "aws" = "aws.us-east"
+  }
+
+  source        = "modules/openvpn"
+  instance_type = "t3.nano"
+  aws_profile   = "${var.aws_profile}"
+  aws_region    = "us-east-1"
+  ami           = "${var.ami}"
+  pub_key       = "${var.pub_key}"
+}
+
+module "ap-south" {
+  providers = {
+    "aws" = "aws.ap-south"
+  }
+
+  source        = "modules/openvpn"
+  instance_type = "t3.nano"
+  aws_profile   = "${var.aws_profile}"
+  aws_region    = "ap-south-1"
+  ami           = "${var.ami}"
+  pub_key       = "${var.pub_key}"
 }
