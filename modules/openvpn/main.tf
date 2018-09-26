@@ -14,13 +14,13 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-data "aws_availability_zones" "current" {}
+data "aws_availability_zones" "available" {}
 
 resource "aws_instance" "openvpn" {
   ami           = "${var.ami == "" ? data.aws_ami.ubuntu.id : var.ami}"
   instance_type = "${var.instance_type}"
 
-  availability_zone = "${data.aws_availability_zones.current.id}"
+  availability_zone = "${data.aws_availability_zones.available.names[0]}" #primary
 
   monitoring = false
   key_name   = "${aws_key_pair.terraformer.key_name}"
