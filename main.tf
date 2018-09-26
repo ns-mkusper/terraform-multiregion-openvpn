@@ -37,15 +37,15 @@ module "us-east" {
   pub_key       = "${var.pub_key}"
 }
 
-module "ap-south" {
+module "ap-northeast" {
   providers = {
-    "aws" = "aws.ap-south"
+    "aws" = "aws.ap-northeast"
   }
 
   source        = "modules/openvpn"
   instance_type = "t3.nano"
   aws_profile   = "${var.aws_profile}"
-  aws_region    = "ap-south-1"
+  aws_region    = "ap-northeast-1"
   ami           = "${var.ami}"
   pub_key       = "${var.pub_key}"
 }

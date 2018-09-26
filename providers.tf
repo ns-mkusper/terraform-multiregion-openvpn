@@ -23,8 +23,8 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias                   = "ap-south"
-  region                  = "ap-south-1"
+  alias                   = "ap-northeast"
+  region                  = "ap-northeast-1"
   profile                 = "${var.aws_profile}"
   shared_credentials_file = "${pathexpand("~/.aws/config")}"
   version                 = "~> 1.34"

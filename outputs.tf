@@ -10,6 +10,6 @@ output "us-east-ip" {
   value = "${module.us-east.ip}"
 }
 
-output "ap-south-ip" {
-  value = "${module.ap-south.ip}"
+output "ap-northeast-ip" {
+  value = "${module.ap-northeast.ip}"
 }
