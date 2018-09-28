@@ -12,7 +12,7 @@ In terms of server configuration, the heavy lifting for this project is mostly c
 
 ## Prerequisites
 
-Valid named AWS profiles should already be setup in your `~/.aws/credentials` file.  We'll assume in the rest of this guide that the profile you want to use is called `YOUR_AWS_PROFILE`.
+Valid named AWS profiles should already be setup in your `~/.aws/config` file.  We'll assume in the rest of this guide that the profile you want to use is called `sandbox`.
 
 You'll also need local copies of `terraform`, `aws-vault`, `ansible` and `jq`.  My (confirmed working) version info follows:
 
@@ -46,7 +46,7 @@ v4.3.0
 3. As a VPN client, I recommend [tunnelblick](https://tunnelblick.net), where setup is especially easy.  When step 2 above finished, you are left with several new files in the working directory which can be used to configure the client.  Assuming you didn't change the `VPN_NAME`, one of these files is `default.ovpn`.  Simply drag the new `default.ovpn` file onto the tunnelblick icon in the menubar and connect with the user/password you set in the Makefile.  Done!  You can verify your configuration by visiting a place like [http://www.whatsmyip.org/](http://www.whatsmyip.org/).
 
 
-## Amazonn credentials setup for Multi-Account
+## Amazon credentials setup for Multi-Account
 
 I'm implementing this as a _Security First_ implementation, so have set this up with roles in mind (not IAM Users, which is a security vector). With this in mind, I utilize a `Zero Trust` account, then  role assume out of it. Due to this your credentials should mirror this setup.
 
@@ -96,11 +96,11 @@ This section is just a walk through of the individual steps you can run that `ma
 
 2. Set an environment variable that terraform will use for your AWS profile, and run `terraform plan` via the Makefile.  Inspect the plan and make sure it's what you expected.
 
-    `$ TF_VAR_aws_profile=YOUR_AWS_PROFILE make plan`
+    `$ TF_VAR_aws_profile=sandbox make plan`
 
 3. Set an environment variable that terraform will use for your AWS profile, and run `terraform apply` via the Makefile.  This will create an EC2 server on AWS, together with the security groups and rules you'll need to use OpenVPN.
 
-    `$ TF_VAR_aws_profile=YOUR_AWS_PROFILE make apply`
+    `$ TF_VAR_aws_profile=sandbox make apply`
 
 4. Edit the ansible file [openvpn.yml](openvpn.yml) to add additional VPN users. You can safely rerun the ansible provisioner as many times as you like to add/edit/remove VPN users (see the next step).
 
