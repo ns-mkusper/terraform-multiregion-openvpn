@@ -1,6 +1,6 @@
 ## About
 
-This project is a top-to-bottom [OpenVPN](https://openvpn.net/) setup for Ubuntu on AWS, using Terraform to create the EC2 resources and security groups, and Ansible to setup VPN users.
+This project is a top-to-bottom [OpenVPN](https://openvpn.net/) setup for Ubuntu on AWS, using Terraform to create the EC2 resources, security groups and Ansible to setup VPN users and AWS Vault to bypass MFA on role assumption.
 
 In terms of server configuration, the heavy lifting for this project is mostly courtesy of the excellent [kyl191.openvpn](https://github.com/kyl191/ansible-role-openvpn) ansible role. What this repository does on top of that is:
 
@@ -12,21 +12,23 @@ In terms of server configuration, the heavy lifting for this project is mostly c
 
 ## Prerequisites
 
-Valid named AWS profiles should already be setup in your `~/.aws/credentials` file.  We'll assume in the rest of this guide that the profile you want to use is called `MY_PROFILE`.
+Valid named AWS profiles should already be setup in your `~/.aws/credentials` file.  We'll assume in the rest of this guide that the profile you want to use is called `YOUR_AWS_PROFILE`.
 
 You'll also need local copies of `terraform`, `aws-vault`, `ansible` and `jq`.  My (confirmed working) version info follows:
 
-    $ terraform --version
-    Terraform v0.11.8
+```bash
+$ terraform --version
+Terraform v0.11.8
 
-    $ ansible --version
-    ansible 2.6.3
+$ ansible --version
+ansible 2.6.3
 
-    $ jq --version
-    jq-1.5
+$ jq --version
+jq-1.5
 
-    $ aws-vault --version
-    v4.3.0
+$ aws-vault --version
+v4.3.0
+```
 
 **Terraform** builds infrastructure resources on clouds like AWS.  It can be downloaded [here](https://www.terraform.io/downloads.html) or you could [use docker](https://hub.docker.com/r/hashicorp/terraform/).  If you prefer docker, just set an appropriate bash alias before using the Makefile.
 
@@ -44,6 +46,46 @@ You'll also need local copies of `terraform`, `aws-vault`, `ansible` and `jq`.  
 3. As a VPN client, I recommend [tunnelblick](https://tunnelblick.net), where setup is especially easy.  When step 2 above finished, you are left with several new files in the working directory which can be used to configure the client.  Assuming you didn't change the `VPN_NAME`, one of these files is `default.ovpn`.  Simply drag the new `default.ovpn` file onto the tunnelblick icon in the menubar and connect with the user/password you set in the Makefile.  Done!  You can verify your configuration by visiting a place like [http://www.whatsmyip.org/](http://www.whatsmyip.org/).
 
 
+## Amazonn credentials setup for Multi-Account
+
+I'm implementing this as a _Security First_ implementation, so have set this up with roles in mind (not IAM Users, which is a security vector). With this in mind, I utilize a `Zero Trust` account, then  role assume out of it. Due to this your credentials should mirror this setup.
+
+##### ~/.aws/credentials
+
+```bash
+[master]
+aws_access_key_id     = xxxx
+aws_secret_access_key = xxxx
+```
+
+
+##### ~/.aws/config
+
+```bash
+[profile sandbox]
+source_profile  = master
+role_arn        = arn:aws:iam::${sandbox_account_number}:role/${sts_role_assumption_name}
+mfa_serial      = arn:aws:iam::${zerotrust_account_number}:mfa/${mfa_id}
+external_id     = ${sandbox_account_number}
+
+
+[profile engineering]
+source_profile  = master
+role_arn        = arn:aws:iam::${engineering_account_number}:role/${sts_role_assumption_name}
+mfa_serial      = arn:aws:iam::${zerotrust_account_number}:mfa/${mfa_id}
+external_id     = ${engineering_account_number}
+
+
+[profile production]
+source_profile  = master
+role_arn        = arn:aws:iam::${production_account_number}:role/${sts_role_assumption_name}
+mfa_serial      = arn:aws:iam::${zerotrust_account_number}:mfa/${mfa_id}
+external_id     = ${production_account_number}
+```
+
+
+
+
 ## Step by Step
 
 This section is just a walk through of the individual steps you can run that `make vpn` would do magically for you.  Follow this instead of the quickstart above if you want to understand more about what's going on.
@@ -54,11 +96,11 @@ This section is just a walk through of the individual steps you can run that `ma
 
 2. Set an environment variable that terraform will use for your AWS profile, and run `terraform plan` via the Makefile.  Inspect the plan and make sure it's what you expected.
 
-    `$ TF_VAR_aws_profile=MY_PROFILE make plan`
+    `$ TF_VAR_aws_profile=YOUR_AWS_PROFILE make plan`
 
 3. Set an environment variable that terraform will use for your AWS profile, and run `terraform apply` via the Makefile.  This will create an EC2 server on AWS, together with the security groups and rules you'll need to use OpenVPN.
 
-    `$ TF_VAR_aws_profile=MY_PROFILE make apply`
+    `$ TF_VAR_aws_profile=YOUR_AWS_PROFILE make apply`
 
 4. Edit the ansible file [openvpn.yml](openvpn.yml) to add additional VPN users. You can safely rerun the ansible provisioner as many times as you like to add/edit/remove VPN users (see the next step).
 
@@ -72,6 +114,18 @@ This section is just a walk through of the individual steps you can run that `ma
 
 6. If you want to tear things down again, you can use `make plan-destroy` to show the plan, and `make destroy` to actually clean up.
 
+
+## Or... Be lazy
+
+1. Generate your keypair
+
+    `$ make keypair`
+
+2. Deploy
+
+    `$ make vpn ## will be prompted for profile`
+
+Yes, that's really it..
 
 ## Discussion, Limitations, Etc
 
