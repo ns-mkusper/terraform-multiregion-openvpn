@@ -14,7 +14,7 @@ In terms of server configuration, the heavy lifting for this project is mostly c
 
 Valid named AWS profiles should already be setup in your `~/.aws/credentials` file.  We'll assume in the rest of this guide that the profile you want to use is called `MY_PROFILE`.
 
-You'll also need local copies of `terraform`, `ansible`, and `jq`.  My (confirmed working) version info follows:
+You'll also need local copies of `terraform`, `aws-vault`, `ansible` and `jq`.  My (confirmed working) version info follows:
 
     $ terraform --version
     Terraform v0.11.8
@@ -24,6 +24,9 @@ You'll also need local copies of `terraform`, `ansible`, and `jq`.  My (confirme
 
     $ jq --version
     jq-1.5
+
+    $ aws-vault --version
+    v4.3.0
 
 **Terraform** builds infrastructure resources on clouds like AWS.  It can be downloaded [here](https://www.terraform.io/downloads.html) or you could [use docker](https://hub.docker.com/r/hashicorp/terraform/).  If you prefer docker, just set an appropriate bash alias before using the Makefile.
 
