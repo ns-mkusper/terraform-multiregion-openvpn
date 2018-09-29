@@ -61,11 +61,12 @@ build: apply
 
 # Broken for now, needs IP selector over EIP or PUBIP
 #
-# ssh: require-tf
-# 	ssh 																																\
-# 	 -i ./ec2-key 																											\
-# 	 -l ubuntu 																													\
-# 	 `terraform output -json |jq -r ".ip.value"`
+ssh: require-tf
+	@ read -p "Enter AWS Region Name: " region  ; 											\
+	ssh 																																\
+	 -i ./ec2-key 																											\
+	 -l ubuntu 																													\
+	 `terraform output -json |jq -r --arg region "$$region" ".[$$region].ip.value"`
 
 
 plan-destroy: require-tf
