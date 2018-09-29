@@ -2,17 +2,22 @@
 # these, but module instantiation typically will not override
 # them if defaults are provided here.
 variable "aws_profile" {
-  type        = "string"
   description = "AWS profile to use"
+  type        = "string"
 }
 
 variable "pub_key" {
-  type        = "string"
   description = "SSH pub key"
+  type        = "string"
 }
 
 variable "ami" {
+  description = "Ubuntu AMI to use. Must match availability zone, instance type, etc"
   type        = "string"
-  description = "Ubuntu AMI to use.  Must match availability zone, instance type, etc"
   default     = ""
+}
+
+variable "dns_name" {
+  description = "The DNS record to be used"
+  type        = "string"
 }

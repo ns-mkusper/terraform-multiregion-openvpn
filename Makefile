@@ -5,21 +5,23 @@ ANSIBLE_CONFIG 			:= ./ansible/ansible.cfg
 export VPN_NAME VPN_USER VPN_PASSWORD
 export ANSIBLE_CONFIG ANSIBLE_ROLES_PATH
 export TF_VAR_aws_profile TF_VAR_pub_key
+export TF_VAR_dns_name
 
 
 # An implicit guard target, used by other targets to ensure
 # that environment variables are set before beginning tasks
 assert-%:
-	@ if [ "${${*}}" = "" ] ; then 																		\
-	    echo "Environment variable $* not set" ; 											\
-	    exit 1 ; 																											\
+	@ if [ "${${*}}" = "" ] ; then 																						\
+	    echo "Environment variable $* not set" ; 															\
+	    exit 1 ; 																															\
 	fi
 
 vpn:
-	@read -p "Enter AWS Profile Name: " profile ; 										\
-	TF_VAR_aws_profile=$$profile make keypair && 											\
-	TF_VAR_aws_profile=$$profile make apply 	&& 											\
-	TF_VAR_aws_profile=$$profile make reprovision
+	@read -p "Enter AWS Profile Name: " profile  ; 														\
+	@read -p "Enter R53 Domain Name:  " dns_name ; 														\
+	TF_VAR_aws_profile=$$profile TF_VAR_dns_name=$$dns_name make keypair 	&& 	\
+	TF_VAR_aws_profile=$$profile TF_VAR_dns_name=$$dns_name make apply 		&& 	\
+	TF_VAR_aws_profile=$$profile TF_VAR_dns_name=$$dns_name make reprovision
 
 
 require-vault:
@@ -28,7 +30,7 @@ require-vault:
 require-ansible:
 	ansible --version &> /dev/null
 
-require-tf: assert-TF_VAR_aws_profile require-vault
+require-tf: assert-TF_VAR_aws_profile assert-TF_VAR_dns_name require-vault
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "--version" &> /dev/null
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "init"
 

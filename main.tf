@@ -1,9 +1,9 @@
 // Per AWS manpage: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/TutorialAddingLBRRegion.html
 resource "aws_route53_zone" "dns" {
-  name = "www.example.com"
+  name = "${var.dns_name}"
 }
 
-resource "aws_route53_record" "multiregion" {
+resource "aws_route53_record" "multi_region" {
   zone_id = "${aws_route53_zone.dns.zone_id}"
   name    = "multiregion.${aws_route53_zone.dns.name}"
   type    = "A"
