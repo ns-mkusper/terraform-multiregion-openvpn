@@ -17,8 +17,9 @@ assert-%:
 	fi
 
 vpn:
-	@read -p "Enter AWS Profile Name: " profile  ; 														\
-	@read -p "Enter R53 Domain Name:  " dns_name ; 														\
+	@ read -p "Enter AWS Profile Name: " profile  ; 													\
+		read -p "Enter R53 Domain Name:  " dns_name ; 													\
+																																						\
 	TF_VAR_aws_profile=$$profile TF_VAR_dns_name=$$dns_name make keypair 	&& 	\
 	TF_VAR_aws_profile=$$profile TF_VAR_dns_name=$$dns_name make apply 		&& 	\
 	TF_VAR_aws_profile=$$profile TF_VAR_dns_name=$$dns_name make reprovision
