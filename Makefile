@@ -59,15 +59,6 @@ apply: require-tf require-ansible ansible-roles
 
 build: apply
 
-# Broken for now, needs IP selector over EIP or PUBIP
-#
-ssh: require-tf
-	@ read -p "Enter AWS Region Name: " region  ; 											\
-	ssh 																																\
-	 -i ./ec2-key 																											\
-	 -l ubuntu 																													\
-	 `terraform output -json |jq -r --arg region "$$region" ".[$$region].ip.value"`
-
 
 plan-destroy: require-tf
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "plan" "-destroy"
@@ -78,8 +69,17 @@ destroy: require-tf
 clean: destroy
 	rm -rf *.ovpn ec2-key* .terraform terraform.*
 
+
 reprovision: require-tf require-jq
-	ansible-playbook 																									\
-	 -v		 																														\
-	 -i `terraform output -json |jq -r '. |map(.value) |join (",")'`, \
+	ansible-playbook 																										\
+	 -v		 																															\
+	 -i `terraform output -json |jq -r '. |map(.value) |join (",")'`, 	\
 	 ./ansible/openvpn.yml
+
+
+ssh: require-tf
+	@ read -p "Enter AWS Region Name: " region  ; 											\
+	ssh 																																\
+	 -i ./ec2-key 																											\
+	 -l ubuntu 																													\
+	 `terraform output -json |jq -r --arg region "$$region" ".[$$region].value"`
