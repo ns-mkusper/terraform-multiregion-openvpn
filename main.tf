@@ -1,3 +1,23 @@
+// Per AWS manpage: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/TutorialAddingLBRRegion.html
+resource "aws_route53_zone" "dns" {
+  name = "www.example.com"
+}
+
+resource "aws_route53_record" "multiregion" {
+  zone_id = "${aws_route53_zone.dns.zone_id}"
+  name    = "multiregion.${aws_route53_zone.dns.name}"
+  type    = "A"
+  ttl     = "5"
+
+  records = [
+    "${module.eu-west.ip}",
+    "${module.us-west.ip}",
+    "${module.us-east.ip}",
+    "${module.ap-northeast.ip}",
+  ]
+}
+
+// Modules for Regions
 module "eu-west" {
   providers = {
     "aws" = "aws.eu-west"
