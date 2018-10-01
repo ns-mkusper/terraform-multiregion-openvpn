@@ -32,8 +32,9 @@ require-ansible:
 	ansible --version &> /dev/null
 
 require-tf: assert-TF_VAR_aws_profile assert-TF_VAR_dns_name require-vault
-	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "--version" &> /dev/null
-	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "init"
+	@ echo "[info] Profile:  $(TF_VAR_aws_profile) \n[info] DNS Name: $(TF_VAR_dns_name)"
+	terraform --version &> /dev/null
+	terraform init
 
 require-jq:
 	jq --version &> /dev/null

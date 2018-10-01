@@ -16,6 +16,11 @@ variable "deployment_suffix" {
   description = "Optional suffix to append to differentiate separate VPN instances"
 }
 
+variable "region" {
+  description = "AWS region to override"
+  type        = "string"
+}
+
 variable "ami" {
   type        = "string"
   description = "AMI to use for VPN server"
