@@ -25,6 +25,6 @@
     - name: Download VPN configuration tarball from the server
       fetch:
         src: "{{ item.path }}"
-        dest: ./
+        dest: ../keys
         flat: yes
       with_items: "{{ files_to_grab.files }}"

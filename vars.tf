@@ -6,6 +6,10 @@ variable "aws_profile" {
   type        = "string"
 }
 
+variable "region" {
+  default = ""
+}
+
 variable "pub_key" {
   description = "SSH pub key"
   type        = "string"

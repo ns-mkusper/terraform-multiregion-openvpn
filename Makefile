@@ -42,7 +42,7 @@ require-jq:
 
 
 keypair:
-	ssh-keygen -N '' -f ec2-key
+	yes y |ssh-keygen -q -N ''  -f ec2-key >/dev/null
 
 ansible-roles:
 	ansible-galaxy install -r ./ansible/requirements.yml
@@ -73,9 +73,18 @@ clean: destroy
 
 reprovision: require-tf require-jq
 	ansible-playbook 																										\
-	 -v		 																															\
 	 -i `terraform output -json |jq -r '. |map(.value) |join (",")'`, 	\
+	 -v		 																															\
 	 ./ansible/openvpn.yml
+
+
+
+debug-reprovision: require-tf require-jq
+	echo >| logs/ansible.log ;
+	ANSIBLE_DEBUG=1 ansible-playbook 																		\
+	 -i `terraform output -json |jq -r '.[].value' |tail -n1`, 	\
+	 -vvvvv		 																													\
+	 ./ansible/openvpn.yml |tee logs/ansible.log
 
 
 ssh: require-tf
