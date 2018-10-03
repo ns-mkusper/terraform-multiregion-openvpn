@@ -12,7 +12,7 @@
     - name: Gather facts
       setup:
   roles:
-    - kykl191.openvpn
+    - kyl191.openvpn
   vars:
     openvpn_client_register_dns: false  # Only Windows client supports this
     clients: [guest]
