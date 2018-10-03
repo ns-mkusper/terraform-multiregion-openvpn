@@ -65,7 +65,7 @@ plan-destroy: require-tf
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "plan" "-destroy"
 
 destroy: require-tf
-	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "destroy"
+	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "destroy" "-auto-approve"
 
 clean: destroy
 	rm -rf *.ovpn ec2-key* .terraform terraform.*
