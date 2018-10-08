@@ -1,4 +1,4 @@
 ---
-  - src: https://github.com/kyl191/ansible-role-openvpn
-    version: 112f9f5
-    name: kyl191.openvpn
+  - src: https://github.com/ehime/ansible-role-openvpn
+    version: 0539f55
+    name: ehime.openvpn

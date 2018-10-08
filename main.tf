@@ -28,7 +28,7 @@ module "eu-west" {
   aws_region    = "eu-west-2"
   instance_type = "t3.nano"
   ami           = "${var.ami}"
-  pub_key       = "${var.pub_key}"
+  pub_key       = "_keys/${var.pub_key}"
 }
 
 module "us-west" {
@@ -41,7 +41,7 @@ module "us-west" {
   aws_profile   = "${var.aws_profile}"
   aws_region    = "us-west-2"
   ami           = "${var.ami}"
-  pub_key       = "${var.pub_key}"
+  pub_key       = "_keys/${var.pub_key}"
 }
 
 module "us-east" {
@@ -54,7 +54,7 @@ module "us-east" {
   aws_profile   = "${var.aws_profile}"
   aws_region    = "us-east-1"
   ami           = "${var.ami}"
-  pub_key       = "${var.pub_key}"
+  pub_key       = "_keys/${var.pub_key}"
 }
 
 module "ap-northeast" {
@@ -67,5 +67,5 @@ module "ap-northeast" {
   aws_profile   = "${var.aws_profile}"
   aws_region    = "ap-northeast-1"
   ami           = "${var.ami}"
-  pub_key       = "${var.pub_key}"
+  pub_key       = "_keys/${var.pub_key}"
 }

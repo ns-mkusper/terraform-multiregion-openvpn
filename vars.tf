@@ -7,7 +7,9 @@ variable "aws_profile" {
 }
 
 variable "region" {
-  default = ""
+  description = "AWS default region"
+  type        = "string"
+  default     = "us-east-1"
 }
 
 variable "pub_key" {

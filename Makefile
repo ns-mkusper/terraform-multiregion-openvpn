@@ -1,4 +1,4 @@
-TF_VAR_pub_key 			:= $(shell cat ./ec2-key.pub)
+TF_VAR_pub_key 			:= $(shell cat _keys/ec2-key.pub)
 ANSIBLE_ROLES_PATH 	:= ./ansible/roles
 ANSIBLE_CONFIG 			:= ./ansible/ansible.cfg
 
@@ -42,10 +42,10 @@ require-jq:
 
 
 keypair:
-	yes y |ssh-keygen -q -N ''  -f ec2-key >/dev/null
+	yes y |ssh-keygen -q -N ''  -f _keys/ec2-key >/dev/null
 
 ansible-roles:
-	ansible-galaxy install -r ./ansible/requirements.yml
+	ansible-galaxy install -r ansible/requirements.yml
 
 
 plan: require-tf
@@ -68,28 +68,26 @@ destroy: require-tf
 	aws-vault exec $(TF_VAR_aws_profile) --assume-role-ttl=60m -- "/usr/local/bin/terraform" "destroy" "-auto-approve"
 
 clean: destroy
-	rm -rf *.ovpn ec2-key* .terraform terraform.*
+	rm -rf _keys/*.ovpn _keys/ec2-key* .terraform terraform.*
 
 
 reprovision: require-tf require-jq
 	ansible-playbook 																										\
 	 -i `terraform output -json |jq -r '. |map(.value) |join (",")'`, 	\
-	 -v		 																															\
-	 ./ansible/openvpn.yml
+	 -v	ansible/openvpn.yml |tee _logs/reprovision.log
 
 
 
 debug-reprovision: require-tf require-jq
-	echo >| logs/ansible.log ;
+	echo >| _logs/debug-reprovision ;
 	ANSIBLE_DEBUG=1 ansible-playbook 																		\
-	 -i `terraform output -json |jq -r '.[].value' |tail -n1`, 	\
-	 -vvvvv		 																													\
-	 ./ansible/openvpn.yml |tee logs/ansible.log
+	 -i `terraform output -json |jq -r '.[].value' |tail -n1`, 					\
+	 -vvvvv	ansible/openvpn.yml |tee _logs/debug-reprovision.log
 
 
 ssh: require-tf
 	@ read -p "Enter AWS Region Name: " region  ; 											\
 	ssh 																																\
-	 -i ./ec2-key 																											\
+	 -i _keys/ec2-key 																									\
 	 -l ubuntu 																													\
 	 `terraform output -json |jq -r --arg region "$$region" ".[$$region].value"`

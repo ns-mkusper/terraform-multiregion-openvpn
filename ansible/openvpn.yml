@@ -12,7 +12,7 @@
     - name: Gather facts
       setup:
   roles:
-    - kyl191.openvpn
+    - ehime.openvpn
   vars:
     openvpn_client_register_dns: false  # Only Windows client supports this
     clients: [guest]
@@ -25,6 +25,6 @@
     - name: Download VPN configuration tarball from the server
       fetch:
         src: "{{ item.path }}"
-        dest: ./
+        dest: ../_keys/
         flat: yes
       with_items: "{{ files_to_grab.files }}"
