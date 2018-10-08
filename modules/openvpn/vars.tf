@@ -12,8 +12,8 @@ variable "aws_region" {
 // instance name, so use i.e. "-dev".
 variable "deployment_suffix" {
   type        = "string"
-  default     = ""
   description = "Optional suffix to append to differentiate separate VPN instances"
+  default     = ""
 }
 
 variable "ami" {
